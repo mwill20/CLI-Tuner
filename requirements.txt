@@ -1,0 +1,32 @@
+# Phase 0: Core dependencies
+# Note: Requires Python >=3.10 (specify in pyproject.toml or document in README)
+
+# Phase 1: Data processing
+datasets>=2.14.0                 # HuggingFace datasets
+transformers>=4.35.0             # Tokenizers, chat templates
+pydantic>=2.0.0                  # Schema validation
+# NOTE: shellcheck must be installed separately (see README.md for OS-specific instructions)
+
+# Phase 2: Training
+torch>=2.0.0                     # PyTorch
+axolotl>=0.4.0                   # Training framework
+peft>=0.6.0                      # LoRA/QLoRA
+bitsandbytes>=0.41.0             # 4-bit quantization
+accelerate>=0.24.0               # Multi-GPU support
+wandb>=0.16.0                    # Experiment tracking
+
+# Phase 3: Evaluation
+lm-eval>=0.4.0                   # Evaluation harness (optional)
+sacrebleu>=2.0.0                 # BLEU score calculation
+nltk>=3.8.0                      # Tokenization utilities
+
+# Phase 5: Deployment
+fastapi>=0.104.0                 # API (optional)
+uvicorn>=0.24.0                  # ASGI server (optional)
+
+# Development / Testing
+pytest>=7.4.0                    # Unit testing
+pytest-cov>=4.1.0                # Coverage reporting
+black>=23.11.0                   # Code formatting
+ruff>=0.1.6                      # Linting
+pre-commit>=3.5.0                # Git hooks (optional)

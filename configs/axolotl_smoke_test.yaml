@@ -1,0 +1,114 @@
+# CLI-Tuner Smoke Test Configuration
+# 10-example test run to validate training setup
+
+# ============================================================================
+# BASE MODEL
+# ============================================================================
+base_model: Qwen/Qwen2.5-Coder-7B-Instruct
+model_type: AutoModelForCausalLM
+tokenizer_type: AutoTokenizer
+trust_remote_code: false
+
+# ============================================================================
+# QUANTIZATION
+# ============================================================================
+load_in_4bit: true
+adapter: lora
+
+# ============================================================================
+# LORA CONFIGURATION
+# ============================================================================
+lora_model_dir: null
+lora_r: 8
+lora_alpha: 16
+lora_dropout: 0.05
+lora_target_modules:
+  - q_proj
+  - v_proj
+  - k_proj
+  - o_proj
+lora_target_linear: false
+lora_fan_in_fan_out: false
+
+# ============================================================================
+# SMOKE TEST DATASETS (10 examples)
+# ============================================================================
+datasets:
+  - path: data/processed/train_smoke.jsonl
+    type: completion
+    field: text
+
+val_set_size: 0.0
+
+test_datasets:
+  - path: data/processed/val_smoke.jsonl
+    ds_type: json
+    split: train
+    type: completion # or alpaca, depending on your data format
+
+# ============================================================================
+# SEQUENCE CONFIGURATION
+# ============================================================================
+sequence_len: 512
+sample_packing: false
+pad_to_sequence_len: true
+
+# ============================================================================
+# BATCH SIZE
+# ============================================================================
+micro_batch_size: 1
+gradient_accumulation_steps: 4
+eval_batch_size: 1
+
+# ============================================================================
+# TRAINING DURATION (SHORT FOR SMOKE TEST)
+# ============================================================================
+num_epochs: 1
+max_steps: 10  # Just 10 steps to verify setup
+
+# ============================================================================
+# OPTIMIZER & LEARNING RATE
+# ============================================================================
+optimizer: adamw_bnb_8bit
+lr_scheduler: cosine
+learning_rate: 0.0002
+warmup_steps: 2  # 20% of 10 steps
+
+# ============================================================================
+# PRECISION
+# ============================================================================
+bf16: true
+fp16: false
+tf32: false
+gradient_checkpointing: true
+
+# ============================================================================
+# CHECKPOINTING (FREQUENT FOR SMOKE TEST)
+# ============================================================================
+output_dir: models/smoke_test_checkpoints
+save_strategy: steps
+save_steps: 5  # Save at steps 5 and 10
+save_total_limit: 2
+
+# ============================================================================
+# EVALUATION (FREQUENT FOR SMOKE TEST)
+# ============================================================================
+eval_strategy: steps
+eval_steps: 5
+
+# ============================================================================
+# LOGGING (EVERY STEP FOR SMOKE TEST)
+# ============================================================================
+logging_steps: 1
+
+# ============================================================================
+# WEIGHTS & BIASES
+# ============================================================================
+wandb_project: cli-tuner
+wandb_run_name: smoke-test-v1
+wandb_log_model: "checkpoint"
+
+# ============================================================================
+# SPECIAL TOKENS
+# ============================================================================
+special_tokens: {}

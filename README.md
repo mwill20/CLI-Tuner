@@ -1,0 +1,329 @@
+# CLI-Tuner
+
+**Secure LLM pipeline for translating natural language to Bash commands with security guardrails**
+
+> Data pipeline for fine-tuning Qwen2.5-Coder-7B-Instruct with zero-tolerance validation
+
+---
+
+## 🎯 The Problem We're Solving
+
+### Pain Point: Unsafe Command Generation for DevOps Teams
+
+**The Customer Problem:**
+- DevOps engineers spend hours writing complex Bash commands from memory or Stack Overflow
+- When they ask an LLM for help, it generates commands—but they can't trust them without manual review
+- **The Risk:** Hallucinates catastrophic operations like `rm -rf /`, `chmod 777 /`, `dd if=/dev/zero of=/dev/sda`
+- **The Cost:** Data loss, system compromise, compliance violations
+- **The Workflow Pain:** Generate → Review → Execute → Pray
+
+**What We're Building:**
+CLI-Tuner is a security-first data pipeline that prepares safe, validated training data for future fine-tuning. Runtime guardrails (input/output validation) are planned for later phases.
+
+---
+
+## 📋 Project Status
+
+### ✅ Phase 0: Repository Setup (Complete)
+- Directory structure, schemas, CI/CD, test scaffolding
+- Zero-tolerance dangerous command patterns defined (17 patterns)
+- Pydantic validation schemas for data pipeline
+
+### ✅ Phase 1: Data Pipeline (Complete)
+**Status:** Validated on 10% sample (1,835 examples, seed=42)
+
+**Capabilities:**
+- ✅ Field normalization (`nl_command` → `instruction`, `bash_code` → `output`)
+- ✅ Shellcheck syntax validation (97.71% pass rate)
+- ✅ Zero-tolerance dangerous pattern filtering (0 dangerous commands in output)
+- ✅ Qwen2.5 chat template application (`<|im_start|>system/user/assistant<|im_end|>`)
+- ✅ Assistant-only masking (user tokens masked to -100)
+- ✅ Deduplication (58 duplicates removed)
+- ✅ Provenance tracking (full audit trail with SHA256 hash)
+
+**Latest Run (seed=42):**
+- Total downloaded: 18,357 examples
+- Sampled: 1,835 (10%)
+- Shellcheck: 1,793/1,835 passed (97.71%)
+- Invalid syntax removed: 42
+- Dangerous commands removed: 0
+- Duplicates removed: 58
+- **Final split:** 1,388 train / 173 val / 174 test (1,735 total)
+
+**Sampling Notes:**
+- To mix the 10% sample, change `SAMPLE_SEED` in `scripts/preprocess_data.py` and rerun.
+- Keep `SAMPLE_SIZE = 1835` for quick validation runs.
+
+**Outputs:**
+- `data/processed/train.jsonl`, `val.jsonl`, `test.jsonl`
+- `data/processed/provenance.json` (full audit trail)
+- `data/validation/random_sample_50.jsonl` (dangerous pattern verification)
+- `data/validation/chat_template_sample_10.txt` (manual review)
+
+**Known Issues:**
+- None. The previous `datetime.utcnow()` deprecation warning is resolved.
+
+### 🚧 Phase 2: Training (Planned)
+- QLoRA fine-tuning (rank=8, alpha=16, 7 target modules)
+- Axolotl configuration-driven training
+- Weights & Biases experiment tracking
+- HuggingFace Hub model publishing
+
+### 🚧 Phase 3-7: Evaluation, Deployment, Documentation (Planned)
+- Command accuracy evaluation (exact match, BLEU)
+- Safety validation (dangerous pattern detection at inference)
+- FastAPI deployment with guardrails
+- Model card and architecture documentation
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+```bash
+# Python 3.10+
+python --version
+
+# Install Shellcheck
+# Ubuntu/Debian
+sudo apt-get install shellcheck
+
+# macOS
+brew install shellcheck
+
+# Windows (Chocolatey)
+choco install shellcheck
+```
+
+**⚠️ Phase 2 (Training) Requirements:**
+- **Linux Required:** Axolotl training framework requires Linux (Triton dependency)
+- **Windows Users:** Use WSL2 for development/testing (see [Phase 2 Spec](docs/Phase_2_Training_SPEC.md#️-platform-requirements))
+- **Recommended:** RunPod cloud GPU for actual training (no local GPU needed)
+
+### Run Phase 1 Pipeline
+
+```bash
+# Clone and setup
+cd /path/to/cli-tuner
+pip install -r requirements.txt
+
+# Run preprocessing (10% sample)
+python scripts/preprocess_data.py
+
+# Generate validation samples
+python scripts/generate_validation_sample.py
+```
+
+**Expected Output:**
+```
+Step 1/7: Loading dataset...
+  Sampling 1835 examples from 18357 total (seed=42)
+Step 2/7: Running shellcheck...
+  Validating 1835 commands with shellcheck...
+  Shellcheck complete: 1793/1835 passed (97%)
+Step 3/7: Filtering dangerous commands...
+Step 4/7: Applying chat template...
+Step 5/7: Tokenizing with assistant-only masking...
+Step 6/7: Splitting train/val/test...
+  Removed 58 duplicate examples
+Step 7/7: Saving outputs...
+Pipeline complete. 1388 train, 173 val, 174 test.
+```
+
+### Configuration
+
+Edit `scripts/preprocess_data.py`:
+```python
+SAMPLE_SIZE = 1835  # Set to None for full 18K dataset
+SAMPLE_SEED = 42    # For reproducible sampling
+SPLIT_SEED = 42     # For reproducible train/val/test split
+```
+
+### Debug Logging
+
+Run scripts with `--debug` to write full debug logs to `logs/` with UTC timestamped filenames:
+
+```bash
+python scripts/preprocess_data.py --debug
+python scripts/generate_validation_sample.py --debug
+```
+
+---
+
+## 🔐 Security Philosophy
+
+**Zero-Trust Architecture:**
+We treat every component as untrusted until validated:
+
+1. **User input** → validation planned (Phase 3+)
+2. **Model output** → validation planned (Phase 3+)
+3. **Training data** → validated for malicious examples (Phase 1 ✅)
+4. **Deployment** → validation planned (Phase 3+)
+
+**Zero-Tolerance Dangerous Patterns (17 patterns):**
+```python
+- Root deletion: rm -rf /, rm --recursive --force /
+- Fork bombs: :(){:|:&};:
+- Disk wipes: dd if=/dev/zero of=/dev/sd*
+- Permission bombs: chmod -R 777 /
+- Blind remote execution: curl | bash, wget | sh
+- Direct disk writes: > /dev/sd*
+- Filesystem formatting: mkfs.*, mkswap
+```
+
+**Phase 1 Guarantees:**
+- ✅ Zero dangerous commands in training data (verified on 10% sample)
+- ✅ Every command Shellcheck-validated for syntax correctness
+- ✅ Full provenance trail (SHA256 hash, filtering stats, versions)
+- ✅ Reproducible sampling (seed=42)
+
+This isn't theoretical. **Real data loss happens from generated commands. We prevent dangerous commands from entering training data.**
+
+---
+
+## 📊 Data Flow (Phase 1)
+
+```
+HuggingFace Dataset (18,357 examples)
+  ↓
+[1] Load + Field Mapping (nl_command→instruction, bash_code→output)
+  ↓ [Random Sample: 1,835 examples, seed=42]
+  ↓
+[2] Shellcheck Syntax Validation (1,793 passed, 42 failed)
+  ↓
+[3] Dangerous Pattern Filtering (0 dangerous commands found)
+  ↓
+[4] Qwen Chat Template (<|im_start|>system/user/assistant<|im_end|>)
+  ↓
+[5] Tokenize + Assistant-Only Masking (user tokens = -100)
+  ↓
+[6] Deduplicate (58 duplicates removed) + Split (80/10/10, seed=42)
+  ↓
+[7] Save Outputs + Provenance + Validation Samples
+  ↓
+data/processed/
+├── train.jsonl (1,388 examples)
+├── val.jsonl (173 examples)
+├── test.jsonl (174 examples)
+└── provenance.json (full audit trail)
+```
+
+---
+
+## 📚 Documentation
+
+### Specifications
+- [`docs/SPECIFICATION_INDEX.md`](docs/SPECIFICATION_INDEX.md) - Master index, issue tracking, phase status
+- [`docs/CLI-Tuner_Northstar_FINAL.md`](docs/CLI-Tuner_Northstar_FINAL.md) - Architectural vision (v4.0)
+- [`docs/Phase_0_Setup_SPEC.md`](docs/Phase_0_Setup_SPEC.md) - Repository initialization
+- [`docs/Phase_1_Data_Pipeline_SPEC.md`](docs/Phase_1_Data_Pipeline_SPEC.md) - Data preprocessing (complete)
+
+### Lessons
+- [`docs/lessons/Lesson_01_Phase1_Data_Pipeline.md`](docs/lessons/Lesson_01_Phase1_Data_Pipeline.md) - Phase 1 walkthrough for early career engineers
+
+### Reviews
+- [`docs/reviews/Overseer_Review_v4.0_2026-01-15.md`](docs/reviews/Overseer_Review_v4.0_2026-01-15.md) - Initial Northstar review
+
+---
+
+## 📁 Project Structure
+
+```
+cli-tuner/
+├── data/
+│   ├── raw/                    # Optional dataset cache (if HF cache is directed here)
+│   ├── processed/              # Phase 1 outputs (train/val/test.jsonl)
+│   ├── logs/                   # Filtering logs (shellcheck, dangerous, violations)
+│   └── validation/             # Overseer validation samples
+├── models/
+│   ├── checkpoints/            # Training checkpoints (Phase 2)
+│   └── cli-tuner-adapters/     # LoRA adapters (Phase 2)
+├── schemas/
+│   ├── dataset.py              # BashCommandExample (Pydantic)
+│   ├── request.py              # API request schemas
+│   └── response.py             # API response schemas
+├── guardrails/
+│   └── patterns.py             # Zero-tolerance dangerous patterns (17 patterns)
+├── scripts/
+│   ├── preprocess_data.py      # Phase 1 pipeline (7 components)
+│   └── generate_validation_sample.py  # Overseer validation artifacts
+├── tests/
+│   └── test_patterns.py        # Dangerous pattern tests
+├── docs/
+│   ├── SPECIFICATION_INDEX.md  # Master index
+│   ├── Phase_*_SPEC.md         # Phase specifications
+│   └── lessons/                # Educational content
+└── requirements.txt            # Python dependencies
+```
+
+---
+
+## 📖 Learning Outcomes
+
+**By completing Phase 1, you've mastered:**
+- Field normalization and schema validation (Pydantic)
+- Syntax validation with external tools (Shellcheck subprocess integration)
+- Security-first data filtering (zero-tolerance patterns)
+- LLM chat template application (Qwen2.5 format)
+- Tokenization strategies (assistant-only masking)
+- Data leakage prevention (deduplication before splitting)
+- Provenance tracking (audit trails, SHA256 hashing)
+- Reproducible sampling (fixed seeds for determinism)
+
+**Phase 2+ will add:**
+- Fine-tuning open-weights LLMs with QLoRA on consumer GPUs
+- Designing evaluation strategies for structured outputs
+- Deploying models (RunPod, AWS, FastAPI)
+- Tracking experiments (Weights & Biases)
+- Publishing models (HuggingFace Hub)
+
+---
+
+## 🎓 Educational Material
+
+This project includes production-quality educational content:
+- **Target audience:** Early career AI/AI security engineers
+- **Pedagogy:** Concept → Code → Hands-on → Interview Prep
+- **Current lesson:** Phase 1 Data Pipeline (see docs/lessons for details)
+
+See [`docs/lessons/`](docs/lessons/) for full curriculum.
+
+---
+
+## ✉️ Questions & Support
+
+**Built with:**
+- Ready Tensor LLM Engineering & Deployment certification course
+- Production security engineering best practices
+- Real customer problems as the north star
+
+**Design philosophy:**
+- Every design choice is documented
+- Every tradeoff is explained
+- Every component has a purpose
+
+**Start with the pain points. Build the solution. Ship with confidence.**
+
+---
+
+## Attribution
+
+- Dataset: `prabhanshubhowal/natural_language_to_linux` (HuggingFace). See the dataset card for license and terms.
+- Base model (planned): `Qwen2.5-Coder-7B-Instruct`. See the model card for license and terms.
+- Tooling: `shellcheck` for Bash syntax validation.
+- Program: Ready Tensor LLM Engineering & Deployment certification course.
+
+---
+
+## 📝 License
+
+MIT License - See LICENSE file for details
+
+---
+
+## 🏆 Project Milestones
+
+- ✅ **2026-01-15:** Phase 1 Data Pipeline validated by Overseer (10% sample)
+- 🚧 **Next:** Phase 2 Training specification
+- 🚧 **Future:** Full dataset processing (18K examples)
+- 🚧 **Future:** Model training, evaluation, deployment

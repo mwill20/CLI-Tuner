@@ -1,0 +1,1 @@
+"""Dangerous pattern tests (placeholder)."""

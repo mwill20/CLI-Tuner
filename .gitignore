@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data files
+data/raw/*
+data/processed/*
+data/logs/*
+data/validation/*
+!data/**/.gitkeep
+
+# Models
+models/checkpoints/*
+models/cli-tuner-adapters/*
+!models/**/.gitkeep
+
+# Logs
+monitoring/logs/*
+monitoring/metrics/*
+!monitoring/**/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# Secrets
+.env
+*.pem
+*.key
+secrets/
+
+# Weights & Biases
+wandb/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+tmp/
+temp/
+*.tmp
