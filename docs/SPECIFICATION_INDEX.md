@@ -25,6 +25,7 @@ docs/
     Overseer_Review_v4.0_2026-01-15.md  # Archived feedback
   lessons/
     Lesson_01_Phase1_Data_Pipeline.md
+    Lesson_02_Phase2_Training.md
 ```
 
 ---
@@ -126,7 +127,7 @@ docs/
 - **Artifacts to Produce (Post-training):**
   - `models/checkpoints/phase2-final/` (LoRA adapters)
   - W&B experiment logs (loss curves, metrics, hyperparameters)
-  - `docs/lessons/Lesson_02_Phase2_Training.md` (deferred to after training)
+  - `docs/lessons/Lesson_02_Phase2_Training.md` (educational content)
 - **Success Gate:**
   - [ ] Smoke test completes without OOM (10 examples, 10 steps)
   - [ ] Full training completes (500 steps, ~1.4 epochs)

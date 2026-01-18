@@ -855,7 +855,7 @@ print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ### 4. Documentation
 - [x] `docs/Phase_2_Training_SPEC.md` (this file)
 - [x] Update `docs/SPECIFICATION_INDEX.md` (add Phase 2 reference)
-- [ ] `docs/lessons/Lesson_02_Phase2_Training.md` (educational content - deferred to after training)
+- [x] `docs/lessons/Lesson_02_Phase2_Training.md` (educational content - deferred to after training)
 
 ---
 
