@@ -9,6 +9,9 @@ import logging
 import random
 from pathlib import Path
 
+# W&B logging
+import wandb
+
 import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -255,6 +258,9 @@ def main() -> None:
     LOGGER.info("Sample size: %s", args.sample_size)
     LOGGER.info("Load in 4-bit: %s", args.load_in_4bit)
 
+    # Initialize W&B run
+    wandb.init(project="ready-tensor-llm", name="validation_run_500")
+
     data_path = Path(args.data_path)
     if not data_path.exists():
         raise RuntimeError(f"Data path not found: {data_path}")
@@ -292,6 +298,9 @@ def main() -> None:
             for record in generated:
                 handle.write(json.dumps(record, ensure_ascii=True) + "\n")
         LOGGER.info("Wrote validation outputs to %s", output_path)
+
+    # Finish W&B run
+    wandb.finish()
 
 
 if __name__ == "__main__":
