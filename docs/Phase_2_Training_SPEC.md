@@ -430,7 +430,7 @@ models/checkpoints/
 ├── checkpoint-100/
 ├── checkpoint-200/
 ├── checkpoint-300/
-└── final/  # Renamed from last checkpoint after training
+└── phase2-final/  # Final checkpoint directory
 ```
 
 ---
@@ -692,12 +692,12 @@ After training completes, validate the checkpoint:
 
 Optional automated validation (generates sample outputs):
 ```bash
-python scripts/validate_checkpoint.py --checkpoint-dir models/checkpoints/final --sample-size 5
+python scripts/validate_checkpoint.py --checkpoint-dir models/checkpoints/phase2-final --sample-size 5
 ```
 
 ### 1. Check Checkpoint Files
 ```bash
-ls -lh models/checkpoints/final/
+ls -lh models/checkpoints/phase2-final/
 # Expected files:
 # - adapter_model.bin (~100MB)
 # - adapter_config.json
@@ -720,7 +720,7 @@ base_model = AutoModelForCausalLM.from_pretrained(
 # Load LoRA adapters
 model = PeftModel.from_pretrained(
     base_model,
-    "models/checkpoints/final"
+    "models/checkpoints/phase2-final"
 )
 
 # Load tokenizer
@@ -1013,7 +1013,7 @@ accelerate launch -m axolotl.cli.train configs/axolotl_config.yaml
 **Expected full training results:**
 - Duration: 30-60 minutes (RTX A5000/4090)
 - Checkpoints: Every 100 steps → 5 checkpoints total
-- Final checkpoint (local): `models/checkpoints/final/`
+- Final checkpoint (local): `models/checkpoints/phase2-final/`
 
 ### 9. Download Checkpoints
 

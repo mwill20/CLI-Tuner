@@ -2,7 +2,7 @@
 
 **Secure LLM pipeline for translating natural language to Bash commands with security guardrails**
 
-> Data pipeline for fine-tuning Qwen2.5-Coder-7B-Instruct with zero-tolerance validation
+> Data and training pipeline for Qwen2.5-Coder-7B-Instruct with zero-tolerance validation
 
 ---
 
@@ -18,7 +18,7 @@
 - **The Workflow Pain:** Generate → Review → Execute → Pray
 
 **What We're Building:**
-CLI-Tuner is a security-first data pipeline that prepares safe, validated training data for future fine-tuning. Runtime guardrails (input/output validation) are planned for later phases.
+CLI-Tuner is a security-first pipeline that prepares safe training data and produces a QLoRA fine-tuned adapter. Runtime guardrails (input/output validation) are planned for later phases.
 
 ---
 
@@ -63,12 +63,13 @@ CLI-Tuner is a security-first data pipeline that prepares safe, validated traini
 **Known Issues:**
 - None. The previous `datetime.utcnow()` deprecation warning is resolved.
 
-### 🚧 Phase 2: Training (Planned)
-- QLoRA fine-tuning (rank=8, alpha=16, 7 target modules)
-- Axolotl configuration-driven training
-- Weights & Biases experiment tracking
-- HuggingFace Hub model publishing
-
+### ? Phase 2: Training (Complete)
+- QLoRA fine-tuning (rank=8, alpha=16, target modules: q_proj/v_proj/k_proj/o_proj)
+- Final training loss: 1.0949 (W&B run sud23155)
+- Final eval loss: 0.8840 (W&B run sud23155)
+- Model checkpoint: `models/checkpoints/phase2-final/`
+- W&B: https://wandb.ai/mwill-itmission20/cli-tuner/runs/sud23155
+- Status: Loss charts attached (PDFs in docs/images: phase2_training_loss.pdf, phase2_eval_loss.pdf; optional GPUmetrics.png)
 ### 🚧 Phase 3-7: Evaluation, Deployment, Documentation (Planned)
 - Command accuracy evaluation (exact match, BLEU)
 - Safety validation (dangerous pattern detection at inference)
@@ -309,7 +310,7 @@ See [`docs/lessons/`](docs/lessons/) for full curriculum.
 ## Attribution
 
 - Dataset: `prabhanshubhowal/natural_language_to_linux` (HuggingFace). See the dataset card for license and terms.
-- Base model (planned): `Qwen2.5-Coder-7B-Instruct`. See the model card for license and terms.
+- Base model: `Qwen2.5-Coder-7B-Instruct`. See the model card for license and terms.
 - Tooling: `shellcheck` for Bash syntax validation.
 - Program: Ready Tensor LLM Engineering & Deployment certification course.
 
@@ -321,9 +322,8 @@ MIT License - See LICENSE file for details
 
 ---
 
-## 🏆 Project Milestones
+## ?? Project Milestones
 
-- ✅ **2026-01-15:** Phase 1 Data Pipeline validated by Overseer (10% sample)
-- 🚧 **Next:** Phase 2 Training specification
-- 🚧 **Future:** Full dataset processing (18K examples)
-- 🚧 **Future:** Model training, evaluation, deployment
+- ? **2026-01-15:** Phase 1 Data Pipeline validated by Overseer (10% sample, 1,735 total)
+- ? **2026-01-17:** Phase 2 Training complete (QLoRA, loss 1.0949 -> 0.8840, W&B run sud23155)
+- ?? **Next:** Phase 3 Evaluation (exact match, command-only rate, safety validation)

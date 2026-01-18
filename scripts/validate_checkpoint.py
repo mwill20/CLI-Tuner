@@ -36,7 +36,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--checkpoint-dir",
-        default=str(ROOT_DIR / "models" / "checkpoints" / "final"),
+        default=str(ROOT_DIR / "models" / "checkpoints" / "phase2-final"),
         help="Path to the LoRA checkpoint directory.",
     )
     parser.add_argument(

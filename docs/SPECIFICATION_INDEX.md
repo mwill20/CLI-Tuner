@@ -124,7 +124,7 @@ docs/
   - `configs/axolotl_smoke_test.yaml` (10-example validation config)
   - `.env.example` (W&B API key template)
 - **Artifacts to Produce (Post-training):**
-  - `models/checkpoints/final/` (LoRA adapters)
+  - `models/checkpoints/phase2-final/` (LoRA adapters)
   - W&B experiment logs (loss curves, metrics, hyperparameters)
   - `docs/lessons/Lesson_02_Phase2_Training.md` (deferred to after training)
 - **Success Gate:**
@@ -321,3 +321,4 @@ docs/
 **Next Update Trigger:** After Phase 2 smoke test results are reviewed
 
 **Maintained By:** Architect (design phase), Overseer (validation phase), PE (implementation phase)
+
