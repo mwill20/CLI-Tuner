@@ -142,23 +142,26 @@ docs/
 ---
 
 ### Phase 3: Evaluation
-- **Status:** Implemented (L4) - Report generated (partial pass)  
-- **Spec Location:** TBD (implementation in `scripts/`)  
-- **Addresses:** OSV-002 (output guardrails), OSV-004 (metric edge cases), OSV-007 (Phase 3 handoff)  
-- **Dependencies:** Phase 2 complete, Overseer approved  
-- **Duration:** 3-5 days  
+- **Status:** ✅ Complete (L5) - Validated by Overseer
+- **Spec Location:** `scripts/evaluate_*.py`, `scripts/eval_utils.py`
+- **Addresses:** OSV-002 (output guardrails), OSV-004 (metric edge cases), OSV-007 (Phase 3 handoff)
+- **Dependencies:** Phase 2 complete, Overseer approved
+- **Duration:** 3-5 days
 - **Artifacts Produced:**
-  - `docs/phase3_evaluation_results.md`
-  - `docs/phase3_evaluation_results/metrics.json/metrics.json/metrics.json`
-  - `docs/phase3_evaluation_results/metrics.json/metrics.json/base_vs_finetuned.json`
-  - `docs/phase3_evaluation_results/metrics.json/metrics.json/results.jsonl`
-  - `docs/phase3_evaluation_results/metrics.json/metrics.json/adversarial_results.jsonl`
+  - `evaluation/domain/metrics.json` (domain evaluation results)
+  - `evaluation/safety/metrics.json` (safety evaluation results)
+  - `evaluation/comparison/base_vs_finetuned.json` (model comparison)
+  - `evaluation/reports/phase3_evaluation_results.md` (official report)
+  - `evaluation/provenance.json` (audit trail)
+  - `docs/phase3_evaluation_results/` (archived RunPod outputs)
+  - `docs/lessons/Lesson_03_Phase3_Evaluation.md` (educational content)
 - **Summary:**
   - Exact match: 13.22% (base 0%)
   - Command-only: 99.43%
   - Generation success: 174/174 (100%)
-  - Safety: test set PASS, adversarial 12/21 safe (FAIL)
-- **Success Gate Status:** Partial pass (domain ok, adversarial safety failed)
+  - Safety: test set PASS (0 dangerous), adversarial 12/21 safe (FAIL)
+- **Success Gate Status:** Partial pass (domain ok, adversarial safety requires CommandRisk V2)
+- **Handoff to Phase 4:** Evaluation complete, documentation in progress
 
 ---
 
@@ -189,16 +192,24 @@ docs/
 
 ---
 
-### Phase 6: Documentation
-- **Status:** ⏳ Awaiting Phase 5 Completion  
-- **Spec Location:** TBD  
-- **Dependencies:** Phase 5 complete  
-- **Duration:** 3-5 days  
-- **Artifacts Expected:**
-  - Model card (HuggingFace format)
-  - README.md
-  - ARCHITECTURE.md
-  - EVALUATION.md
+### Phase 6: Documentation (Phase 4 in RT Brief)
+
+- **Status:** 🔄 In Progress (L4)
+- **Spec Location:** Phase 4 Implementation Brief
+- **Dependencies:** Phase 3 complete
+- **Duration:** 1-2 days
+- **Artifacts Produced:**
+  - [x] `MODEL_CARD.md` (HuggingFace format) - Complete
+  - [x] README.md training context section - Complete
+  - [x] README.md Future Enhancements (CommandRisk V2) - Complete
+  - [x] SPECIFICATION_INDEX.md Phase 4 update - Complete
+  - [ ] Git commit for Phase 4 documentation - Pending
+- **Success Gate:**
+  - [x] MODEL_CARD.md follows HuggingFace standards
+  - [x] README documents 13.22% accuracy with context
+  - [x] Known limitations table with mitigations
+  - [x] Future enhancements roadmap (CommandRisk V2)
+  - [ ] All documentation committed to Git
 
 ---
 
@@ -229,22 +240,27 @@ docs/
 
 ---
 
-## CURRENT PRIORITIES (2026-01-18)
+## CURRENT PRIORITIES (2026-01-19)
 
-### Immediate (This Week)
-1. **Overseer Review:** Validate Phase 3 evaluation report and artifacts
-2. **PE Execution:** Plan CommandRisk guardrails for adversarial failures
+### Immediate (Today)
 
-### Short-Term (Weeks 1-2)
-1. **PE Implementation:** CommandRisk guardrails and re-run safety evaluation
-2. **Decision Point:** Quantization required?
+1. **PE Execution:** Complete Phase 4 documentation (MODEL_CARD.md, README updates) - IN PROGRESS
+2. **PE Execution:** Commit Phase 4 documentation artifacts
 
-### Medium-Term (Weeks 3-4)
-1. **PE Implementation:** Phase 5 Deployment
-2. **Architect Design:** Phase 6 Documentation Spec
+### Short-Term (This Week)
 
-### Long-Term (Week 5+)
-1. **PE Implementation:** Phase 7 RT Submission
+1. **PE Implementation:** CommandRisk V2 guardrails for adversarial failures
+2. **PE Execution:** Re-run safety evaluation with inference guardrails
+3. **Decision Point:** Quantization required for RT submission?
+
+### Medium-Term (Weeks 1-2)
+
+1. **PE Implementation:** Phase 5 Deployment (FastAPI with guardrails)
+2. **PE Execution:** Final evaluation and report update
+
+### Long-Term (Weeks 2-3)
+
+1. **PE Implementation:** Phase 7 RT Submission (HuggingFace Hub, final artifacts)
 
 ## DEFERRED DECISIONS
 
@@ -294,10 +310,11 @@ docs/
 | 1.2 | 2026-01-15 | Phase 2 spec linked, artifacts prepared, priorities updated | PE |
 | 1.3 | 2026-01-18 | Phase 2 complete, Phase 3 implementation in progress, priorities updated | PE |
 | 1.4 | 2026-01-18 | Phase 3 report generated (partial pass) and priorities updated | PE |
+| 1.5 | 2026-01-19 | Phase 4 documentation: MODEL_CARD.md, README training context, CommandRisk V2 roadmap | Overseer |
 
 ---
 
-**Next Update Trigger:** After CommandRisk guardrails are implemented and safety re-evaluated
+**Next Update Trigger:** After Phase 4 documentation committed and CommandRisk V2 implementation begins
 
 **Maintained By:** Architect (design phase), Overseer (validation phase), PE (implementation phase)
 

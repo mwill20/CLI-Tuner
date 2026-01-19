@@ -84,6 +84,35 @@ CLI-Tuner is a security-first pipeline that prepares safe training data and prod
 - Evaluation report finalization + model card
 - FastAPI deployment with guardrails
 - Ready Tensor submission artifacts
+
+### Phase 3: Evaluation Context
+
+**Model Performance:**
+
+- **Exact Match Accuracy:** 13.22% (base model: 0%)
+- **Command-Only Format:** 99.4% (base model: ~30%)
+- **Dangerous Commands Generated:** 0/174 (PASS)
+- **Adversarial Resistance:** 12/21 safe (57% - FAIL)
+
+**What This Demonstrates:**
+This project demonstrates a complete ML engineering workflow: data preprocessing, QLoRA fine-tuning, and rigorous evaluation. The 13.22% exact match accuracy reflects the challenge of precise command generation, while the 99.4% command-only rate shows successful format learning. The model learned the task structure but requires inference-time guardrails before deployment.
+
+**Known Limitations:**
+
+| Limitation | Planned Mitigation |
+| ---------- | ------------------ |
+| 13.22% exact match accuracy | Acceptable for demonstration; production use requires CommandRisk guardrails |
+| Adversarial prompts bypass (9/21) | CommandRisk V2 with inference-time filtering (Phase 5) |
+| No runtime guardrails | FastAPI deployment with input/output validation (Phase 5+) |
+| Small training set (1,735 examples) | Full dataset training possible with more compute |
+
+**Training Environment:**
+
+- **Platform:** RunPod cloud GPU (A100 40GB)
+- **Framework:** Axolotl 0.6.0 + PEFT 0.14.0
+- **Base Model:** Qwen2.5-Coder-7B-Instruct
+- **Quantization:** 4-bit NF4 (QLoRA)
+
 ---
 
 ## 🚀 Quick Start
@@ -371,10 +400,54 @@ cli-tuner/
 - Safety gaps under adversarial prompts
 
 **Phase 4+ will add:**
+
 - Inference-time guardrails (CommandRisk) and safety re-evaluation
 - Optional general benchmarks (GSM8K, HumanEval)
 - Deployment with runtime guardrails (FastAPI)
 - Documentation and Ready Tensor submission materials
+
+---
+
+## Future Enhancements: CommandRisk V2
+
+The Phase 3 evaluation revealed that 9/21 adversarial prompts bypassed safety filters. **CommandRisk V2** addresses this gap with inference-time guardrails.
+
+### Planned Architecture
+
+```text
+User Input
+    |
+    v
+[Input Validator] -- reject malicious prompts
+    |
+    v
+[Fine-tuned Model] -- generate command
+    |
+    v
+[Output Validator] -- catch dangerous patterns
+    |
+    v
+Safe Command Output (or rejection message)
+```
+
+### Key Features
+
+| Feature | Description | Status |
+| ------- | ----------- | ------ |
+| Input sanitization | Detect prompt injection attempts | Planned (Phase 5) |
+| Output filtering | Apply 17 dangerous patterns to generated output | Planned (Phase 5) |
+| Confidence scoring | Flag low-confidence generations for review | Planned (Phase 5) |
+| Audit logging | Track all generations with risk scores | Planned (Phase 5) |
+
+### Success Criteria
+
+- Adversarial safe rate: >= 95% (currently 57%)
+- Zero dangerous commands in output (maintain current PASS)
+- Latency overhead: < 50ms per request
+
+### Implementation Notes
+
+CommandRisk V2 will be implemented as a FastAPI middleware layer that wraps the fine-tuned model inference. This allows the same guardrails to be reused across different deployment scenarios (API, CLI, batch processing).
 
 ---
 
