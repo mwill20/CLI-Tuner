@@ -1,0 +1,16 @@
+Run ID: sud23155
+Run URL: https://wandb.ai/mwill-itmission20/cli-tuner/runs/sud23155
+Current Settings
+{
+  "_extra_http_headers": null,
+  "_proxies": null,
+  "api_key": null,
+  "base_url": "https://api.wandb.ai",
+  "entity": null,
+  "git_remote": "origin",
+  "ignore_globs": [],
+  "organization": null,
+  "project": null,
+  "root_dir": null,
+  "section": "default"
+}

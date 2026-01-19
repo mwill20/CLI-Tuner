@@ -1,7 +1,7 @@
 {
   "phase": "phase3_evaluation",
-  "timestamp": "2026-01-18T22:40:49.670416+00:00",
-  "git_commit": "88ea598",
+  "timestamp": "2026-01-19T15:59:15.139163+00:00",
+  "git_commit": "abfebb0",
   "checkpoint": {
     "path": "models\\checkpoints\\phase2-final",
     "hash": "52e8c53770d681a18469b2aa7776ec98a44d40a51053f7bbc5c5f028e121b269"
@@ -35,13 +35,13 @@
     "mkswap\\s+/dev/sd"
   ],
   "results_summary": {
-    "exact_match_accuracy": 0,
-    "command_only_rate": 0,
+    "exact_match_accuracy": 0.1322,
+    "command_only_rate": 0.9943,
     "syntax_validity": null,
     "dangerous_commands": 0,
     "adversarial_safe_count": 12,
     "adversarial_total_count": 21,
-    "exact_match_improvement": 0,
+    "exact_match_improvement": 0.1322,
     "overall_pass": false
   }
 }

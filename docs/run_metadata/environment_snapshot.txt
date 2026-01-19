@@ -1,0 +1,6 @@
+PyTorch: 2.5.1
+Transformers: 4.57.6
+PEFT: 0.14.0
+Axolotl: 0.6.0
+CUDA version: 12.1
+Platform: RunPod cloud GPU
