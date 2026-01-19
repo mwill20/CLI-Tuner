@@ -72,6 +72,33 @@ CLI-Tuner is a security-first pipeline that prepares safe training data and prod
 - Status: Loss charts attached (PDFs in docs/images: phase2_training_loss.pdf, phase2_eval_loss.pdf; optional GPUmetrics.png)
 - Results doc: `docs/phase2_training_results.md`
 
+### Phase 2: Reproducibility Artifacts
+
+**Dataset Provenance:**
+- Training data: `data/processed/train.jsonl` (1,388 examples)
+- Dataset hash: `sha256:fba6d7048ededa4b728bd374d971ec3c62f4e93281280c175851a082b9d8a9bb`
+- Full provenance: `data/processed/provenance.json`
+- Fingerprint file: `docs/run_metadata/dataset_fingerprint.txt`
+
+**Training Environment:**
+- Platform: RunPod cloud GPU (24GB VRAM; exact model not recorded)
+- CUDA: 12.1
+- PyTorch: 2.5.1
+- Transformers: 4.57.6
+- Axolotl: 0.6.0
+- PEFT: 0.14.0
+- Full snapshot: `docs/run_metadata/environment_snapshot.txt`
+
+**W&B Tracking:**
+- Run ID: sud23155
+- Run URL: https://wandb.ai/mwill-itmission20/cli-tuner/runs/sud23155
+- Metadata: `docs/run_metadata/wandb_run_metadata.txt`
+
+**Checkpoints:**
+- Location: `models/checkpoints/phase2-final/`
+- Training curves: `docs/images/phase2_training_loss.pdf`
+- GPU metrics: `docs/images/GPUmetrics.png`
+
 ### Phase 3: Evaluation (Partial Pass)
 - Report: `docs/phase3_evaluation_results.md`
 - Domain: exact match 13.22% (base 0%), command-only 99.43%
@@ -95,7 +122,7 @@ CLI-Tuner is a security-first pipeline that prepares safe training data and prod
 - **Adversarial Resistance:** 12/21 safe (57% - FAIL)
 
 **What This Demonstrates:**
-This project demonstrates a complete ML engineering workflow: data preprocessing, QLoRA fine-tuning, and rigorous evaluation. The 13.22% exact match accuracy reflects the challenge of precise command generation, while the 99.4% command-only rate shows successful format learning. The model learned the task structure but requires inference-time guardrails before deployment.
+This project demonstrates a complete ML engineering workflow: data preprocessing, QLoRA fine-tuning, and rigorous evaluation. The 13.22% exact match accuracy reflects the strictness of string-based evaluation; functionally equivalent commands with different syntax (for example, `ls -la` vs `ls -al`) are counted as failures. The 99.4% command-only rate shows successful format learning. The model learned the task structure but requires inference-time guardrails before deployment.
 
 **Known Limitations:**
 
@@ -108,7 +135,7 @@ This project demonstrates a complete ML engineering workflow: data preprocessing
 
 **Training Environment:**
 
-- **Platform:** RunPod cloud GPU (A100 40GB)
+- **Platform:** RunPod cloud GPU (24GB VRAM; exact model not recorded)
 - **Framework:** Axolotl 0.6.0 + PEFT 0.14.0
 - **Base Model:** Qwen2.5-Coder-7B-Instruct
 - **Quantization:** 4-bit NF4 (QLoRA)

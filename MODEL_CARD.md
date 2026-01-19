@@ -66,7 +66,9 @@ Users should:
 - **Source:** `prabhanshubhowal/natural_language_to_linux` (HuggingFace)
 - **Original Size:** 18,357 examples
 - **Sampled Size:** 1,835 examples (10%, seed=42)
-- **Final Split:** 1,388 train / 173 val / 174 test (1,735 total after filtering)
+- **After Shellcheck:** 1,793 examples (42 invalid removed)
+- **After Deduplication:** 1,735 examples (58 duplicates removed)
+- **Final Split:** 1,388 train / 173 val / 174 test
 
 ### Preprocessing
 
@@ -89,14 +91,14 @@ Users should:
   - Dropout: 0.05
 - **Optimizer:** AdamW (8-bit)
 - **Learning rate:** 2e-4
-- **Batch size:** 4 (effective 16 with gradient accumulation)
+- **Effective batch size:** 4 (micro batch size 1, gradient accumulation 4)
 - **Epochs:** 3
 - **Warmup:** 10 steps
 
 #### Training Environment
 
-- **Platform:** RunPod cloud GPU
-- **Hardware:** NVIDIA A100 40GB
+- **Platform:** RunPod cloud GPU (24GB VRAM)
+- **Hardware:** Exact GPU model not recorded (RunPod typically provisions A5000/A6000/A100)
 - **Software:**
   - PyTorch 2.5.1
   - Transformers 4.57.6
@@ -166,7 +168,7 @@ The model failed to learn:
 
 #### Hardware
 
-- NVIDIA A100 40GB GPU (RunPod)
+- RunPod cloud GPU (24GB VRAM; exact model not recorded)
 
 #### Software
 
