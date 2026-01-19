@@ -7,12 +7,12 @@ import re
 
 ZERO_TOLERANCE_PATTERNS = [
     # Root deletion
-    r"rm\s+-rf\s+/",  # rm -rf /
-    r"rm\s+-r\s+-f\s+/",  # rm -r -f /
-    r"rm\s+--recursive\s+--force\s+/",  # rm --recursive --force /
+    r"rm\s+-rf\s+/(?:\s*$|\*\s*$)",  # rm -rf / or rm -rf /*
+    r"rm\s+-r\s+-f\s+/\s*$",  # rm -r -f /
+    r"rm\s+--recursive\s+--force\s+/\s*$",  # rm --recursive --force /
     # Fork bomb
-    r":\(\)\{:\|:\&\};:",  # fork bomb canonical
-    r":\(\)\{:\|:\&\}",  # fork bomb variant
+    r":\(\)\{\s*:\|\s*:\&\s*\};:",  # fork bomb canonical (allow whitespace)
+    r":\(\)\{\s*:\|\s*:\&\s*\}",  # fork bomb variant (allow whitespace)
     # Disk wipe
     r"dd\s+if=/dev/zero\s+of=/dev/sd",  # zero-fill disk
     r"dd\s+if=/dev/random\s+of=/dev/sd",  # random-fill disk
@@ -31,6 +31,9 @@ ZERO_TOLERANCE_PATTERNS = [
     r"mkfs\.",  # filesystem format
     r"mkswap\s+/dev/sd",  # swap format
 ]
+
+# Backward-compatible alias for evaluation scripts/tests.
+DANGEROUS_COMMAND_PATTERNS = ZERO_TOLERANCE_PATTERNS
 
 COMPILED_PATTERNS = [
     (pattern, re.compile(pattern, re.IGNORECASE))

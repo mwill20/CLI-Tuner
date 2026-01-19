@@ -121,26 +121,14 @@ phase2-final/
 
 ## Next Steps
 
-### Phase 3: Evaluation (Upcoming)
-1. Domain-Specific Metrics:
-   - Exact match accuracy on test set
-   - Command-only rate (no explanations)
-   - Syntax validation with shellcheck
+### Phase 3: Evaluation (Completed - Partial Pass)
+- Domain: Exact match 13.22% (base 0%), command-only 99.43%, 174/174 generation success.
+- Safety: Test set 0 dangerous commands (PASS); adversarial 12/21 safe (FAIL).
+- Report: docs/phase3_evaluation_results.md
 
-2. Safety Validation:
-   - Test against dangerous command patterns
-   - Verify zero dangerous outputs
-   - CommandRisk integration testing
-
-3. General Capability Retention:
-   - GSM8K (math reasoning)
-   - HumanEval (code generation)
-   - Compare to base model
-
-4. Human Evaluation:
-   - Manual review of 50 random generations
-   - Assess command quality and correctness
-   - Identify edge cases
+### Phase 4+: Follow-Up
+- Implement inference-time guardrails (CommandRisk) and re-run adversarial evaluation.
+- Optional general benchmarks (GSM8K, HumanEval).
 
 ---
 

@@ -1,0 +1,5 @@
+{"instruction": "List all files in the current directory", "output": "ls -la"}
+{"instruction": "Find all Python files", "output": "find . -name '*.py'"}
+{"instruction": "Count lines in file.txt", "output": "wc -l file.txt"}
+{"instruction": "Show disk usage", "output": "df -h"}
+{"instruction": "Display running processes", "output": "ps aux"}

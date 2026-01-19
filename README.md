@@ -70,12 +70,20 @@ CLI-Tuner is a security-first pipeline that prepares safe training data and prod
 - Model checkpoint: `models/checkpoints/phase2-final/`
 - W&B: https://wandb.ai/mwill-itmission20/cli-tuner/runs/sud23155
 - Status: Loss charts attached (PDFs in docs/images: phase2_training_loss.pdf, phase2_eval_loss.pdf; optional GPUmetrics.png)
-### 🚧 Phase 3-7: Evaluation, Deployment, Documentation (Planned)
-- Command accuracy evaluation (exact match, BLEU)
-- Safety validation (dangerous pattern detection at inference)
-- FastAPI deployment with guardrails
-- Model card and architecture documentation
+- Results doc: `docs/phase2_training_results.md`
 
+### Phase 3: Evaluation (Partial Pass)
+- Report: `docs/phase3_evaluation_results.md`
+- Domain: exact match 13.22% (base 0%), command-only 99.43%
+- Generation success: 174/174 (100%)
+- Safety: test set 0 dangerous commands (PASS); adversarial 12/21 safe (57% - FAIL)
+- Status: inference-time guardrails required before deployment (CommandRisk in Phase 5)
+
+### Phase 4-7: Deployment, Documentation, Submission (Planned)
+- Inference guardrails (input/output validation)
+- Evaluation report finalization + model card
+- FastAPI deployment with guardrails
+- Ready Tensor submission artifacts
 ---
 
 ## 🚀 Quick Start
@@ -144,10 +152,40 @@ SPLIT_SEED = 42     # For reproducible train/val/test split
 
 Run scripts with `--debug` to write full debug logs to `logs/` with UTC timestamped filenames:
 
-```bash
+```
 python scripts/preprocess_data.py --debug
 python scripts/generate_validation_sample.py --debug
 ```
+
+### Run Phase 3 Evaluation (after training)
+
+Note: `scripts/verify_eval_dependencies.sh` is a bash script. Run it from WSL or Git Bash on Windows.
+
+```
+bash scripts/verify_eval_dependencies.sh
+
+python scripts/evaluate_domain.py \
+  --checkpoint models/checkpoints/phase2-final \
+  --test-data data/processed/test.jsonl \
+  --output-dir evaluation/domain
+
+python scripts/evaluate_safety.py \
+  --checkpoint models/checkpoints/phase2-final \
+  --test-data data/processed/test.jsonl \
+  --adversarial-prompts data/adversarial/adversarial_prompts.jsonl \
+  --output-dir evaluation/safety
+
+python scripts/compare_models.py \
+  --checkpoint models/checkpoints/phase2-final \
+  --test-data data/processed/test.jsonl \
+  --output-dir evaluation/comparison
+
+python scripts/generate_eval_report.py \
+  --evaluation-dir evaluation \
+  --output evaluation/reports/phase3_evaluation_results.md
+```
+
+Note: The Phase 3 report in this repo was generated from archived metrics under `docs/phase3_evaluation_results/metrics.json/metrics.json/`. Re-running the scripts above will populate `evaluation/` with fresh outputs.
 
 ---
 
@@ -156,10 +194,10 @@ python scripts/generate_validation_sample.py --debug
 **Zero-Trust Architecture:**
 We treat every component as untrusted until validated:
 
-1. **User input** → validation planned (Phase 3+)
-2. **Model output** → validation planned (Phase 3+)
-3. **Training data** → validated for malicious examples (Phase 1 ✅)
-4. **Deployment** → validation planned (Phase 3+)
+1. **User input** -> runtime guardrails planned (Phase 5)
+2. **Model output** -> evaluation implemented (Phase 3); runtime guardrails planned (Phase 5)
+3. **Training data** -> validated for malicious examples (Phase 1 complete)
+4. **Deployment** -> validation planned (Phase 5+)
 
 **Zero-Tolerance Dangerous Patterns (17 patterns):**
 ```python
@@ -209,6 +247,31 @@ data/processed/
 └── provenance.json (full audit trail)
 ```
 
+## Data Flow (Phase 3 Evaluation)
+
+```
+Inputs
+  - data/processed/test.jsonl
+  - data/adversarial/adversarial_prompts.jsonl
+  - models/checkpoints/phase2-final/
+  - Base model (Qwen2.5-Coder-7B-Instruct)
+
+[Expected outputs when scripts are run]
+[1] evaluate_domain.py -> evaluation/domain/results.jsonl + metrics.json
+[2] evaluate_safety.py -> evaluation/safety/metrics.json
+[3] compare_models.py -> evaluation/comparison/base_vs_finetuned.json
+[4] generate_eval_report.py -> evaluation/provenance.json + reports/phase3_evaluation_results.md
+
+Optional
+  - evaluate_general.py -> evaluation/general/{finetuned,baseline}/results.json
+
+[Archived report inputs in this repo]
+  - docs/phase3_evaluation_results/metrics.json/metrics.json/metrics.json
+  - docs/phase3_evaluation_results/metrics.json/metrics.json/base_vs_finetuned.json
+  - docs/phase3_evaluation_results/metrics.json/metrics.json/adversarial_results.jsonl
+  - docs/phase3_evaluation_results/metrics.json/metrics.json/results.jsonl
+```
+
 ---
 
 ## 📚 Documentation
@@ -218,48 +281,74 @@ data/processed/
 - [`docs/CLI-Tuner_Northstar_FINAL.md`](docs/CLI-Tuner_Northstar_FINAL.md) - Architectural vision (v4.0)
 - [`docs/Phase_0_Setup_SPEC.md`](docs/Phase_0_Setup_SPEC.md) - Repository initialization
 - [`docs/Phase_1_Data_Pipeline_SPEC.md`](docs/Phase_1_Data_Pipeline_SPEC.md) - Data preprocessing (complete)
+- [`docs/Phase_2_Training_SPEC.md`](docs/Phase_2_Training_SPEC.md) - Training implementation (complete)
+- [`docs/phase2_training_results.md`](docs/phase2_training_results.md) - Phase 2 training results
+- [`docs/phase3_evaluation_results.md`](docs/phase3_evaluation_results.md) - Phase 3 evaluation report
 
 ### Lessons
-- [`docs/lessons/Lesson_01_Phase1_Data_Pipeline.md`](docs/lessons/Lesson_01_Phase1_Data_Pipeline.md) - Phase 1 walkthrough for early career engineers
+- [`docs/lessons/Lesson_01_Phase1_Data_Pipeline.md`](docs/lessons/Lesson_01_Phase1_Data_Pipeline.md) - Phase 1 walkthrough
+- [`docs/lessons/Lesson_02_Phase2_Training.md`](docs/lessons/Lesson_02_Phase2_Training.md) - Phase 2 walkthrough
+- [`docs/lessons/Lesson_03_Phase3_Evaluation.md`](docs/lessons/Lesson_03_Phase3_Evaluation.md) - Phase 3 walkthrough
 
 ### Reviews
 - [`docs/reviews/Overseer_Review_v4.0_2026-01-15.md`](docs/reviews/Overseer_Review_v4.0_2026-01-15.md) - Initial Northstar review
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 cli-tuner/
-├── data/
-│   ├── raw/                    # Optional dataset cache (if HF cache is directed here)
-│   ├── processed/              # Phase 1 outputs (train/val/test.jsonl)
-│   ├── logs/                   # Filtering logs (shellcheck, dangerous, violations)
-│   └── validation/             # Overseer validation samples
-├── models/
-│   ├── checkpoints/            # Training checkpoints (Phase 2)
-│   └── cli-tuner-adapters/     # LoRA adapters (Phase 2)
-├── schemas/
-│   ├── dataset.py              # BashCommandExample (Pydantic)
-│   ├── request.py              # API request schemas
-│   └── response.py             # API response schemas
-├── guardrails/
-│   └── patterns.py             # Zero-tolerance dangerous patterns (17 patterns)
-├── scripts/
-│   ├── preprocess_data.py      # Phase 1 pipeline (7 components)
-│   └── generate_validation_sample.py  # Overseer validation artifacts
-├── tests/
-│   └── test_patterns.py        # Dangerous pattern tests
-├── docs/
-│   ├── SPECIFICATION_INDEX.md  # Master index
-│   ├── Phase_*_SPEC.md         # Phase specifications
-│   └── lessons/                # Educational content
-└── requirements.txt            # Python dependencies
+|-- configs/
+|   |-- evaluation_config.yaml
+|   |-- axolotl_config.yaml
+|   |-- axolotl_smoke_test.yaml
+|-- data/
+|   |-- raw/                    # Optional dataset cache
+|   |-- processed/              # Phase 1 outputs (train/val/test.jsonl)
+|   |-- logs/                   # Filtering logs (shellcheck, dangerous, violations)
+|   |-- validation/             # Overseer validation samples
+|   |-- adversarial/            # Adversarial prompts for Phase 3
+|-- evaluation/                 # Phase 3 outputs
+|   |-- domain/
+|   |-- safety/
+|   |-- comparison/
+|   |-- reports/
+|-- logs/                       # Debug logs (scripts --debug)
+|-- models/
+|   |-- checkpoints/            # Training checkpoints (Phase 2)
+|-- schemas/
+|   |-- dataset.py              # BashCommandExample (Pydantic)
+|   |-- request.py              # API request schemas
+|   |-- response.py             # API response schemas
+|   |-- evaluation.py           # Phase 3 evaluation schema
+|-- guardrails/
+|   |-- patterns.py             # Zero-tolerance dangerous patterns (17 patterns)
+|-- scripts/
+|   |-- preprocess_data.py      # Phase 1 pipeline
+|   |-- generate_validation_sample.py  # Overseer validation artifacts
+|   |-- validate_checkpoint.py  # Phase 2 validation
+|   |-- evaluate_domain.py      # Phase 3 domain metrics
+|   |-- evaluate_safety.py      # Phase 3 safety checks
+|   |-- compare_models.py       # Phase 3 comparison
+|   |-- generate_eval_report.py # Phase 3 report generation
+|   |-- eval_utils.py           # Shared evaluation helpers
+|-- tests/
+|   |-- unit/
+|   |-- integration/
+|   |-- fixtures/
+|-- docs/
+|   |-- SPECIFICATION_INDEX.md  # Master index
+|   |-- Phase_*_SPEC.md         # Phase specifications
+|   |-- lessons/                # Educational content
+|   |-- phase3_evaluation_results/  # Archived Phase 3 metrics for the report
+|-- requirements.txt            # Core dependencies
+|-- requirements-eval.txt       # Phase 3 evaluation dependencies
 ```
 
 ---
 
-## 📖 Learning Outcomes
+## Learning Outcomes
 
 **By completing Phase 1, you've mastered:**
 - Field normalization and schema validation (Pydantic)
@@ -271,12 +360,21 @@ cli-tuner/
 - Provenance tracking (audit trails, SHA256 hashing)
 - Reproducible sampling (fixed seeds for determinism)
 
-**Phase 2+ will add:**
-- Fine-tuning open-weights LLMs with QLoRA on consumer GPUs
-- Designing evaluation strategies for structured outputs
-- Deploying models (RunPod, AWS, FastAPI)
-- Tracking experiments (Weights & Biases)
-- Publishing models (HuggingFace Hub)
+**By completing Phase 2, you've learned:**
+- QLoRA fine-tuning on consumer GPUs
+- Axolotl configuration and training execution
+- W&B experiment tracking and checkpoint management
+
+**By completing Phase 3, you've validated:**
+- Domain accuracy improvements over base model
+- Command-only format compliance
+- Safety gaps under adversarial prompts
+
+**Phase 4+ will add:**
+- Inference-time guardrails (CommandRisk) and safety re-evaluation
+- Optional general benchmarks (GSM8K, HumanEval)
+- Deployment with runtime guardrails (FastAPI)
+- Documentation and Ready Tensor submission materials
 
 ---
 
@@ -285,7 +383,7 @@ cli-tuner/
 This project includes production-quality educational content:
 - **Target audience:** Early career AI/AI security engineers
 - **Pedagogy:** Concept → Code → Hands-on → Interview Prep
-- **Current lesson:** Phase 1 Data Pipeline (see docs/lessons for details)
+- **Current lessons:** Phase 1 Data Pipeline, Phase 2 Training, Phase 3 Evaluation (see docs/lessons/)
 
 See [`docs/lessons/`](docs/lessons/) for full curriculum.
 
@@ -326,4 +424,5 @@ MIT License - See LICENSE file for details
 
 - ? **2026-01-15:** Phase 1 Data Pipeline validated by Overseer (10% sample, 1,735 total)
 - ? **2026-01-17:** Phase 2 Training complete (QLoRA, loss 1.0949 -> 0.8840, W&B run sud23155)
-- ?? **Next:** Phase 3 Evaluation (exact match, command-only rate, safety validation)
+- ? **2026-01-18:** Phase 3 evaluation report generated (partial pass, adversarial fail)
+- ?? **Next:** Implement CommandRisk guardrails (Phase 5) and re-run safety eval

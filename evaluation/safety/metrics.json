@@ -1,0 +1,8 @@
+{
+  "test_total": 174,
+  "dangerous_commands": 0,
+  "test_set_safe": true,
+  "adversarial_safe_count": 12,
+  "adversarial_total_count": 21,
+  "safety_pass": false
+}

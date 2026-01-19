@@ -1,6 +1,6 @@
 # CLI-Tuner Specification Index
-**Version:** 1.2  
-**Last Updated:** 2026-01-15  
+**Version:** 1.4  
+**Last Updated:** 2026-01-18  
 **Purpose:** Track implementation specifications derived from Northstar v4.0  
 **Maintainer:** Architect  
 **Reviewers:** Overseer (validation), PE (implementation)
@@ -37,7 +37,7 @@ docs/
 | OSV-001 | Trust boundary validation behavior (schema validation, injection handling, error responses) | Critical | Phase 1 | ✅ Complete | `Phase_1_Data_Pipeline_SPEC.md#L89-156` | Overseer (2026-01-15) |
 | OSV-002 | Output guardrails pattern matching (performance, execution order, evasion resistance) | Critical | Phase 5 | ⏳ Not Started | TBD | N/A |
 | OSV-003 | Data preprocessing verification (chat template, masking, shellcheck, dangerous filtering) | Critical | Phase 1 | ✅ Complete | `Phase_1_Data_Pipeline_SPEC.md#L158-298` | Overseer (2026-01-15) |
-| OSV-004 | Evaluation metric edge cases (whitespace normalization, case sensitivity, rounding rules) | Critical | Phase 3 | ⏳ Not Started | TBD | N/A |
+| OSV-004 | Evaluation metric edge cases (whitespace normalization, case sensitivity, rounding rules) | Critical | Phase 3 | Implemented | `scripts/eval_utils.py` | PE (2026-01-18) |
 | OSV-005 | Quantization quality degradation (metric definition, measurement, rollback criteria) | Important | Phase 4 | ⏸️ Optional | TBD (post-RT v1.0.0) | N/A |
 | OSV-006 | Monitoring implementation (logging format, aggregation, storage, alerting) | Important | Phase 7 | ⏸️ Optional | TBD (post-RT v1.0.0) | N/A |
 | OSV-007 | Phase handoff criteria (dependencies, artifacts, success gates, Overseer validation) | Critical | All Phases | 🔄 In Progress | Each phase spec | Overseer (P0/P1: 2026-01-15) |
@@ -115,71 +115,50 @@ docs/
 ---
 
 ### Phase 2: Training Setup & Fine-Tuning
-- **Status:** 📋 Ready for Implementation (Spec Complete)  
+- **Status:** Implemented (L4) - Training complete  
 - **Spec Location:** `docs/Phase_2_Training_SPEC.md`  
 - **Addresses:** OSV-007 (Phase 2 handoff), QLoRA training within VRAM constraints  
 - **Dependencies:** Phase 1 complete (dataset validated)  
-- **Duration:** 1-2 weeks (implementation + initial training runs)  
-- **Artifacts Prepared (Pre-training):**
-  - `configs/axolotl_config.yaml` (main training configuration)
-  - `configs/axolotl_smoke_test.yaml` (10-example validation config)
-  - `.env.example` (W&B API key template)
-- **Artifacts to Produce (Post-training):**
+- **Duration:** 1-2 weeks (completed)  
+- **Artifacts Produced:**
   - `models/checkpoints/phase2-final/` (LoRA adapters)
-  - W&B experiment logs (loss curves, metrics, hyperparameters)
-  - `docs/lessons/Lesson_02_Phase2_Training.md` (educational content)
+  - W&B run `sud23155` (loss curves, metrics)
+  - `docs/phase2_training_results.md`
+  - `docs/lessons/Lesson_02_Phase2_Training.md`
 - **Success Gate:**
-  - [ ] Smoke test completes without OOM (10 examples, 10 steps)
-  - [ ] Full training completes (500 steps, ~1.4 epochs)
-  - [ ] Loss converges (validation loss decreases)
-  - [ ] Model generates valid Bash commands (syntactically correct)
-  - [ ] Checkpoint files saved (<200MB per checkpoint)
-  - [ ] W&B run logged with full provenance
-  - [ ] GPU memory usage < 12GB (well under 24GB limit)
+  - [x] Smoke test completes without OOM (10 examples, 10 steps)
+  - [x] Full training completes (500 steps, ~1.4 epochs)
+  - [x] Loss converges (validation loss decreases)
+  - [x] Model generates valid Bash commands (syntactically correct)
+  - [x] Checkpoint files saved (<200MB per checkpoint)
+  - [x] W&B run logged with full provenance
+  - [x] GPU memory usage < 12GB (observed ~9GB)
 - **Handoff to Phase 3:** Fine-tuned LoRA adapters ready for evaluation
-- **Overseer Validations:**
-  - Memory budget verified: ~10GB total (fits in 24GB GPU with 14GB headroom) ✅
-  - Example count corrected: 1,735 total (Architect claimed 1,746) ✅
-  - Steps per epoch corrected: 347 steps (Architect claimed 437) ✅
-  - Validation strategy clarified: Use separate val.jsonl (not split from train) ✅
-  - LoRA target modules verified for Qwen2.5 architecture ✅
-- **Recommendations:**
-  - Start with r=8, extend to r=16 if model underfits
-  - Start with 500 steps, extend to 1,000 if loss still decreasing
-  - Save checkpoints every 100 steps for resumption safety
-  - Monitor W&B dashboard for early stopping signal
-- **User Actions Required:**
-  - Create W&B account and get API key
-  - Install Axolotl: `pip install axolotl`
-  - Create `.env` file from `.env.example`
-  - (Optional) Set up RunPod if using cloud GPU
-- **Latest Execution Summary (10% sample, seed=42):**
-  - Total downloaded: 18357
-  - Sampled: 1835
-  - Schema violations: 0
-  - Missing fields: 0
-  - Shellcheck: 1793/1835 passed (97.71%)
-  - Invalid syntax removed: 42
-  - Dangerous commands removed: 0
-  - Duplicates removed: 58
-  - Final split: 1388 train / 173 val / 174 test (1735 total)
+- **Latest Execution Summary:**
+  - Final training loss: 1.0949
+  - Final eval loss: 0.8840
+  - W&B run: https://wandb.ai/mwill-itmission20/cli-tuner/runs/sud23155
 
 ---
 
 ### Phase 3: Evaluation
-- **Status:** ⏳ Awaiting Phase 2 Completion  
-- **Spec Location:** TBD  
+- **Status:** Implemented (L4) - Report generated (partial pass)  
+- **Spec Location:** TBD (implementation in `scripts/`)  
 - **Addresses:** OSV-002 (output guardrails), OSV-004 (metric edge cases), OSV-007 (Phase 3 handoff)  
 - **Dependencies:** Phase 2 complete, Overseer approved  
 - **Duration:** 3-5 days  
-- **Artifacts Expected:**
-  - `evaluation/RESULTS.md`
-  - `evaluation/metrics.json`
-  - `evaluation/failures.jsonl`
-- **Success Gate Preview:**
-  - Exact Match ≥ 85%
-  - Command-Only Rate ≥ 98%
-  - Safety Test: 100% dangerous commands blocked
+- **Artifacts Produced:**
+  - `docs/phase3_evaluation_results.md`
+  - `docs/phase3_evaluation_results/metrics.json/metrics.json/metrics.json`
+  - `docs/phase3_evaluation_results/metrics.json/metrics.json/base_vs_finetuned.json`
+  - `docs/phase3_evaluation_results/metrics.json/metrics.json/results.jsonl`
+  - `docs/phase3_evaluation_results/metrics.json/metrics.json/adversarial_results.jsonl`
+- **Summary:**
+  - Exact match: 13.22% (base 0%)
+  - Command-only: 99.43%
+  - Generation success: 174/174 (100%)
+  - Safety: test set PASS, adversarial 12/21 safe (FAIL)
+- **Success Gate Status:** Partial pass (domain ok, adversarial safety failed)
 
 ---
 
@@ -250,25 +229,22 @@ docs/
 
 ---
 
-## CURRENT PRIORITIES (2026-01-15)
+## CURRENT PRIORITIES (2026-01-18)
 
 ### Immediate (This Week)
-1. ? **Overseer Review:** Phase 2 Training Spec (APPROVED 2026-01-15)
-2. ?? **PE Implementation:** Phase 2 smoke test prep (Axolotl install, W&B setup, smoke datasets)
-3. ? **PE Execution:** Phase 2 smoke test run (10 steps)
+1. **Overseer Review:** Validate Phase 3 evaluation report and artifacts
+2. **PE Execution:** Plan CommandRisk guardrails for adversarial failures
 
 ### Short-Term (Weeks 1-2)
-1. **PE Execution:** Phase 2 full training (500 steps)
-2. **Overseer Review:** Phase 2 smoke test + training results
-3. **Architect Design:** Phase 3 Evaluation Spec
-
-### Medium-Term (Weeks 3-4)
-1. **PE Implementation:** Phase 3 Evaluation
+1. **PE Implementation:** CommandRisk guardrails and re-run safety evaluation
 2. **Decision Point:** Quantization required?
 
-### Long-Term (Week 5+)
+### Medium-Term (Weeks 3-4)
 1. **PE Implementation:** Phase 5 Deployment
 2. **Architect Design:** Phase 6 Documentation Spec
+
+### Long-Term (Week 5+)
+1. **PE Implementation:** Phase 7 RT Submission
 
 ## DEFERRED DECISIONS
 
@@ -316,10 +292,12 @@ docs/
 | 1.0 | 2026-01-15 | Initial creation, Phase 0/1 specs ready | Architect |
 | 1.1 | 2026-01-15 | Phase 0/1 approved by Overseer, marked L3 (PE-Ready) | Overseer |
 | 1.2 | 2026-01-15 | Phase 2 spec linked, artifacts prepared, priorities updated | PE |
+| 1.3 | 2026-01-18 | Phase 2 complete, Phase 3 implementation in progress, priorities updated | PE |
+| 1.4 | 2026-01-18 | Phase 3 report generated (partial pass) and priorities updated | PE |
 
 ---
 
-**Next Update Trigger:** After Phase 2 smoke test results are reviewed
+**Next Update Trigger:** After CommandRisk guardrails are implemented and safety re-evaluated
 
 **Maintained By:** Architect (design phase), Overseer (validation phase), PE (implementation phase)
 
