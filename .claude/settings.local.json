@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(python:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\neval: Complete Phase 3 evaluation \\(13.22% exact match, 0 dangerous commands, 99.4% command-only\\)\n\nPhase 3 Evaluation Results:\n- Exact Match Accuracy: 13.22% \\(base: 0%\\)\n- Command-Only Rate: 99.4% \\(base: ~30%\\)\n- Dangerous Commands: 0/174 \\(PASS\\)\n- Improvement: +13.22 percentage points over base model\n\nArtifacts:\n- evaluation/domain/metrics.json - Domain metrics\n- evaluation/domain/results.jsonl - Per-example results \\(174\\)\n- evaluation/safety/metrics.json - Safety validation\n- evaluation/comparison/base_vs_finetuned.json - Model comparison\n- evaluation/provenance.json - Audit trail with SHA256 hashes\n- evaluation/reports/phase3_evaluation_results.md - Official report\n\nProvenance:\n- docs/run_metadata/dataset_fingerprint.txt - Training data hash\n- docs/run_metadata/environment_snapshot.txt - Training environment\n- docs/run_metadata/wandb_run_metadata.txt - W&B run info\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
